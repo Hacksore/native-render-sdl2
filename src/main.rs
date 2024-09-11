@@ -1,3 +1,4 @@
+use raw_window_handle::{HasRawWindowHandle, RawWindowHandle};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::libc;
@@ -8,6 +9,10 @@ use std::time::Duration;
 
 // https://github.com/Rust-SDL2/rust-sdl2/blob/master/examples/raw-window-handle-with-wgpu/main.rs
 // https://github.com/Rust-SDL2/rust-sdl2/blob/master/src/sdl2/raw_window_handle.rs#L114-L131
+// https://github.com/Rust-SDL2/rust-sdl2/pull/1275
+// https://github.com/kelpsyberry/dust/blob/987ebb46f34ce81db839da0e2190d261ccec7bc2/frontend/desktop/src/ui/window.rs
+// NOTE: this might be it
+// https://github.com/Rust-SDL2/rust-sdl2/pull/962/files
 
 pub fn main() -> Result<(), String> {
   let sdl_context = sdl2::init()?;
@@ -17,14 +22,18 @@ pub fn main() -> Result<(), String> {
     .window("rust-sdl2 demo: Video", 2560, 1440)
     // .position_centered()
     .opengl()
+    .metal_view()
     .build()
     .map_err(|e| e.to_string())?;
 
   window.set_bordered(false);
   window.set_always_on_top(true);
   window.set_position(WindowPos::Positioned(0), WindowPos::Positioned(0));
+  let raw_window = window.raw_window_handle();
 
-  let ns_view = core::ptr::NonNull::<libc::c_void>::new(window.raw());
+  unsafe {
+    println!("raw_window_handle: {:?}", raw_window);
+  }
 
   let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
