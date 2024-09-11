@@ -1,7 +1,7 @@
-use raw_window_handle::{HasRawWindowHandle, RawWindowHandle};
+use objc::msg_send;
+use raw_window_handle::{AppKitWindowHandle, HasRawWindowHandle, RawWindowHandle};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::libc;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::video::WindowPos;
@@ -29,10 +29,18 @@ pub fn main() -> Result<(), String> {
   window.set_bordered(false);
   window.set_always_on_top(true);
   window.set_position(WindowPos::Positioned(0), WindowPos::Positioned(0));
-  let raw_window = window.raw_window_handle();
 
   unsafe {
-    println!("raw_window_handle: {:?}", raw_window);
+    let raw_window = window.raw_window_handle().unwrap();
+    
+    match raw_window {
+      RawWindowHandle::AppKit(AppKitWindowHandle { ns_view, .. }) => {
+        let ns_window = ns_view.window();
+        // set the window bg to clear
+        let _: () = msg_send![ns_window, setBackgroundColor:objc::runtime::NO];
+      }
+      _ => (),
+    }
   }
 
   let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
