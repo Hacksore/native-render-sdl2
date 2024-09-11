@@ -1,66 +1,39 @@
-#[cfg(target_os = "macos")]
-use bevy::window::CompositeAlphaMode;
-use bevy::{
-  prelude::*,
-  sprite::{MaterialMesh2dBundle, Mesh2dHandle},
-  window::{Cursor, WindowLevel},
-};
+use eframe::egui::{self, Color32, Pos2, Rect, Stroke, Vec2};
 
-fn main() {
-  App::new()
-    .add_plugins(DefaultPlugins.set(WindowPlugin {
-      primary_window: Some(Window {
-        // Setting `transparent` allows the `ClearColor`'s alpha value to take effect
-        transparent: true, // Disabling window decorations to make it feel more like a widget than a window
-        window_level: WindowLevel::AlwaysOnTop,
-        cursor: Cursor {
-          // Allow inputs to pass through to apps behind this app.
-          hit_test: false,
-          ..default()
-        },
-        decorations: false,
-        #[cfg(target_os = "macos")]
-        composite_alpha_mode: CompositeAlphaMode::PostMultiplied,
-        ..default()
-      }),
-      ..default()
-    }))
-    // ClearColor must have 0 alpha, otherwise some color will bleed through
-    .insert_resource(ClearColor(Color::NONE))
-    .add_systems(Startup, setup)
-    .add_systems(Update, on_render)
-    .run();
+fn draw_square(ui: &mut egui::Ui) {
+  // Set the size and position of the square
+  let size = Vec2::new(100.0, 100.0); // width and height
+  let top_left = Pos2::new(50.0, 50.0); // position from the top-left corner
+
+  // Define the rectangle for the square
+  let rect = Rect::from_min_size(top_left, size);
+
+  // Get the painter for the current UI area
+  let painter = ui.painter();
+
+  // Draw the square
+  painter.rect(
+    rect,
+    0.0,                              // Rounding radius (0 means no rounding)
+    Color32::from_rgb(200, 100, 100), // Fill color
+    Stroke::new(2.0, Color32::BLACK), // Stroke (border width and color)
+  );
 }
 
-// A component to tag our square
-#[derive(Component)]
-struct Square;
+fn main() -> Result<(), eframe::Error> {
+  eframe::run_native(
+    "Square Example",
+    eframe::NativeOptions::default(),
+    Box::new(|_cc| Ok(Box::new(SquareApp))),
+  )
+}
 
-// create an on render that moves the sqaure we made in setup
-fn on_render(time: Res<Time>, mut query: Query<&mut Transform, With<Square>>) {
-  for mut transform in query.iter_mut() {
-    transform.translation.x += time.delta_seconds() * 100.0; // adjust speed as needed
+struct SquareApp;
+
+impl eframe::App for SquareApp {
+  fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    egui::CentralPanel::default().show(ctx, |ui| {
+      draw_square(ui); // Call the function to draw the square
+    });
   }
-}
-
-fn setup(
-  mut commands: Commands,
-  mut meshes: ResMut<Assets<Mesh>>,
-  mut materials: ResMut<Assets<ColorMaterial>>,
-) {
-  commands.spawn(Camera2dBundle::default());
-
-  let square = Mesh2dHandle(meshes.add(Rectangle::new(100.0, 100.0)));
-
-  // Distribute colors evenly across the rainbow.
-  let color = Color::hsl(0.0, 0.95, 0.7);
-
-  commands
-    .spawn(MaterialMesh2dBundle {
-      mesh: square,
-      material: materials.add(color),
-      transform: Transform::from_xyz(0.0, 0.0, 0.0),
-      ..default()
-    })
-    .insert(Square);
 }
