@@ -51,7 +51,7 @@ fn setup(
 ) {
   commands.spawn(Camera2dBundle::default());
 
-  let square = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0)));
+  let square = Mesh2dHandle(meshes.add(Rectangle::new(100.0, 100.0)));
 
   // Distribute colors evenly across the rainbow.
   let color = Color::hsl(0.0, 0.95, 0.7);
@@ -60,8 +60,7 @@ fn setup(
     mesh: square,
     material: materials.add(color),
     transform: Transform::from_xyz(
-      // Distribute shapes from -X_EXTENT/2 to +X_EXTENT/2.
-      -X_EXTENT / 2.,
+      0.0,
       0.0,
       0.0,
     ),
@@ -70,11 +69,11 @@ fn setup(
 
   #[cfg(not(target_arch = "wasm32"))]
   commands.spawn(
-    TextBundle::from_section("Press space to toggle wireframes", TextStyle::default()).with_style(
+    TextBundle::from_section("Bevy just works", TextStyle::default()).with_style(
       Style {
         position_type: PositionType::Absolute,
-        top: Val::Px(12.0),
-        left: Val::Px(12.0),
+        top: Val::Px(0.0),
+        left: Val::Px(0.0),
         ..default()
       },
     ),
