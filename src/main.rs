@@ -22,9 +22,12 @@ pub fn main() -> Result<(), String> {
 
   let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
-  // canvas.set_draw_color(Color::RGB(0, 0, 0));
-  // canvas.clear();
-  // canvas.present();
+  canvas.clear();
+
+  canvas.set_draw_color(Color::RGB(0, 0, 200));
+  canvas.fill_rect(Rect::new(0, 0, 100, 100))?;
+
+  canvas.present();
 
   let mut event_pump = sdl_context.event_pump()?;
 
@@ -39,13 +42,6 @@ pub fn main() -> Result<(), String> {
         _ => {}
       }
     }
-
-    canvas.clear();
-
-    canvas.set_draw_color(Color::RGB(0, 0, 200));
-    canvas.fill_rect(Rect::new(0, 0, 100, 100))?;
-
-    canvas.present();
 
     ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
     // The rest of the game loop goes here...
