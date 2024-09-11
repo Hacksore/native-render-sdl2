@@ -1,4 +1,6 @@
-use objc::msg_send;
+use cocoa::base::nil;
+use objc::runtime::Object;
+use objc::{msg_send, sel, sel_impl};
 use raw_window_handle::{AppKitWindowHandle, HasRawWindowHandle, RawWindowHandle};
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -32,13 +34,20 @@ pub fn main() -> Result<(), String> {
 
   unsafe {
     let raw_window = window.raw_window_handle().unwrap();
-    
+
     match raw_window {
       RawWindowHandle::AppKit(AppKitWindowHandle { ns_view, .. }) => {
-        let ns_window = ns_view.window();
-        // set the window bg to clear
-        let _: () = msg_send![ns_window, setBackgroundColor:objc::runtime::NO];
+        let ns_view: *mut Object = ns_view.as_ptr().cast();
+        let ns_window: *mut Object = msg_send![ns_view, window];
+        let _: () = msg_send![ns_window, setOpaque: false];
+        let _: () = msg_send![ns_window, setBackgroundColor: nil];
+        let _: () = msg_send![ns_window, setHasShadow: false];
+
+        // get window level from the ns_window
+        let window_level: i64 = msg_send![ns_window, level];
+        println!("window_level: {}", window_level);
       }
+
       _ => (),
     }
   }
@@ -60,7 +69,7 @@ pub fn main() -> Result<(), String> {
       }
     }
 
-    canvas.set_draw_color(Color::RGB(0, 0, 0));
+    canvas.set_draw_color(Color::RGBA(0, 0, 0, 100));
     canvas.clear();
 
     canvas.set_draw_color(Color::RGB(0, 0, 200));
