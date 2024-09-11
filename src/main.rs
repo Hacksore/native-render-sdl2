@@ -10,6 +10,12 @@ use sdl2::rect::Rect;
 use std::thread;
 use std::time::Duration;
 
+pub enum NSWindowSharingType {
+  NSWindowSharingNone = 0,
+  NSWindowSharingReadOnly = 1,
+  NSWindowSharingReadWrite = 2,
+}
+
 pub fn main() -> Result<(), String> {
   let sdl_context = sdl2::init()?;
   let video_subsystem = sdl_context.video()?;
@@ -39,6 +45,9 @@ pub fn main() -> Result<(), String> {
 
         // just to prove that this is working by letting you not see CMD+tab
         ns_window.setLevel_(1001);
+
+        // set the sharing type
+        // let _: () = msg_send![ns_window, setSharingType:NSWindowSharingType::NSWindowSharingNone];
 
         ns_view.setBackgroundColor_(NSColor::clearColor(nil));
         ns_view.setOpaque_(NO);
