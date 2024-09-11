@@ -1,9 +1,3 @@
-//! Shows how to display a window in transparent mode.
-//!
-//! This feature works as expected depending on the platform. Please check the
-//! [documentation](https://docs.rs/bevy/latest/bevy/prelude/struct.Window.html#structfield.transparent)
-//! for more details.
-
 #[cfg(target_os = "macos")]
 use bevy::window::CompositeAlphaMode;
 use bevy::{
@@ -37,11 +31,16 @@ fn main() {
     .add_systems(Update, on_render)
     .run();
 }
-const X_EXTENT: f32 = 900.;
 
-fn on_render() {
-  // render 
-  println!("render");
+// A component to tag our square
+#[derive(Component)]
+struct Square;
+
+// create an on render that moves the sqaure we made in setup
+fn on_render(time: Res<Time>, mut query: Query<&mut Transform, With<Square>>) {
+  for mut transform in query.iter_mut() {
+    transform.translation.x += time.delta_seconds() * 100.0; // adjust speed as needed
+  }
 }
 
 fn setup(
@@ -56,26 +55,12 @@ fn setup(
   // Distribute colors evenly across the rainbow.
   let color = Color::hsl(0.0, 0.95, 0.7);
 
-  commands.spawn(MaterialMesh2dBundle {
-    mesh: square,
-    material: materials.add(color),
-    transform: Transform::from_xyz(
-      0.0,
-      0.0,
-      0.0,
-    ),
-    ..default()
-  });
-
-  #[cfg(not(target_arch = "wasm32"))]
-  commands.spawn(
-    TextBundle::from_section("Bevy just works", TextStyle::default()).with_style(
-      Style {
-        position_type: PositionType::Absolute,
-        top: Val::Px(0.0),
-        left: Val::Px(0.0),
-        ..default()
-      },
-    ),
-  );
+  commands
+    .spawn(MaterialMesh2dBundle {
+      mesh: square,
+      material: materials.add(color),
+      transform: Transform::from_xyz(0.0, 0.0, 0.0),
+      ..default()
+    })
+    .insert(Square);
 }
