@@ -46,6 +46,7 @@ pub fn main() -> Result<(), String> {
         // get window level from the ns_window
         let window_level: i64 = msg_send![ns_window, level];
         println!("window_level: {}", window_level);
+        println!("window: {:?}", ns_window);
       }
 
       _ => (),
