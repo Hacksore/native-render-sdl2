@@ -1,33 +1,13 @@
-use objc::msg_send;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::libc;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::sys::{SDL_GetVersion, SDL_GetWindowWMInfo, SDL_SysWMinfo, SDL_bool, SDL_SYSWM_TYPE};
-use sdl2::video::{Window, WindowPos};
+use sdl2::video::WindowPos;
 use std::time::Duration;
 
-fn get_macos_window_handle(window: &Window) -> Option<*mut std::ffi::c_void> {
-  let mut wm_info: SDL_SysWMinfo = unsafe { std::mem::zeroed() };
-  unsafe {
-    SDL_GetVersion(&mut wm_info.version);
-    if SDL_GetWindowWMInfo(window.raw(), &mut wm_info) == SDL_bool::SDL_FALSE {
-      return None;
-    }
-  }
-
-  unsafe {
-    match wm_info.subsystem {
-      SDL_SYSWM_TYPE::SDL_SYSWM_COCOA => {
-        // The exact field name might vary, so you may need to adjust this
-        // It could be `wm_info.info.cocoa.window` or `wm_info.info.x11.window` or something else
-        // You may need to inspect the `SDL_SysWMinfo` struct definition in your SDL2 bindings
-        Some(wm_info.info.x11.window as *mut std::ffi::c_void)
-      }
-      _ => None,
-    }
-  }
-}
+// https://github.com/Rust-SDL2/rust-sdl2/blob/master/examples/raw-window-handle-with-wgpu/main.rs
+// https://github.com/Rust-SDL2/rust-sdl2/blob/master/src/sdl2/raw_window_handle.rs#L114-L131
 
 pub fn main() -> Result<(), String> {
   let sdl_context = sdl2::init()?;
@@ -44,14 +24,7 @@ pub fn main() -> Result<(), String> {
   window.set_always_on_top(true);
   window.set_position(WindowPos::Positioned(0), WindowPos::Positioned(0));
 
-  // give me the cocoa raw window handle
-  let native_window = get_macos_window_handle(&window).unwrap();
-
-  unsafe {
-    // get windowd id
-    let window_id: u64 = msg_send![native_window, windowNumber];
-  }
-
+  let ns_view = core::ptr::NonNull::<libc::c_void>::new(window.raw());
 
   let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
