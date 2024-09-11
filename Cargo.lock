@@ -537,6 +537,7 @@ name = "native-render-sdl2"
 version = "0.1.0"
 dependencies = [
  "cocoa",
+ "core-graphics",
  "libc",
  "objc",
  "raw-window-handle",

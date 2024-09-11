@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 cocoa = "0.26.0"
+core-graphics = "0.24.0"
 libc = "0.2.158"
 objc = "0.2.7"
 raw-window-handle = "0.6.2"

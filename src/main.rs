@@ -1,4 +1,5 @@
-use cocoa::base::nil;
+use cocoa::appkit::{NSColor, NSWindow};
+use cocoa::base::{nil, NO};
 use objc::runtime::Object;
 use objc::{msg_send, sel, sel_impl};
 use raw_window_handle::{AppKitWindowHandle, HasRawWindowHandle, RawWindowHandle};
@@ -6,23 +7,16 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::video::WindowPos;
 use std::time::Duration;
-
-// https://github.com/Rust-SDL2/rust-sdl2/blob/master/examples/raw-window-handle-with-wgpu/main.rs
-// https://github.com/Rust-SDL2/rust-sdl2/blob/master/src/sdl2/raw_window_handle.rs#L114-L131
-// https://github.com/Rust-SDL2/rust-sdl2/pull/1275
-// https://github.com/kelpsyberry/dust/blob/987ebb46f34ce81db839da0e2190d261ccec7bc2/frontend/desktop/src/ui/window.rs
-// NOTE: this might be it
-// https://github.com/Rust-SDL2/rust-sdl2/pull/962/files
 
 pub fn main() -> Result<(), String> {
   let sdl_context = sdl2::init()?;
   let video_subsystem = sdl_context.video()?;
 
   let mut window = video_subsystem
-    .window("rust-sdl2 demo: Video", 2560, 1440)
-    // .position_centered()
+    .window("rust-sdl2 demo: Video", 600, 600)
+    .position_centered()
+    .allow_highdpi()
     .opengl()
     .metal_view()
     .build()
@@ -30,7 +24,6 @@ pub fn main() -> Result<(), String> {
 
   window.set_bordered(false);
   window.set_always_on_top(true);
-  window.set_position(WindowPos::Positioned(0), WindowPos::Positioned(0));
 
   unsafe {
     let raw_window = window.raw_window_handle().unwrap();
@@ -39,13 +32,16 @@ pub fn main() -> Result<(), String> {
       RawWindowHandle::AppKit(AppKitWindowHandle { ns_view, .. }) => {
         let ns_view: *mut Object = ns_view.as_ptr().cast();
         let ns_window: *mut Object = msg_send![ns_view, window];
-        let _: () = msg_send![ns_window, setOpaque: false];
-        let _: () = msg_send![ns_window, setBackgroundColor: nil];
-        let _: () = msg_send![ns_window, setHasShadow: false];
+        ns_window.setBackgroundColor_(NSColor::clearColor(nil));
+        ns_window.setOpaque_(NO);
+        ns_window.setHasShadow_(NO);
 
-        // get window level from the ns_window
-        let window_level: i64 = msg_send![ns_window, level];
-        println!("window_level: {}", window_level);
+        // just to prove that this is working by letting you not see CMD+tab
+        ns_window.setLevel_(1001);
+
+        ns_view.setBackgroundColor_(NSColor::clearColor(nil));
+        ns_view.setOpaque_(NO);
+
         println!("window: {:?}", ns_window);
       }
 
@@ -53,10 +49,22 @@ pub fn main() -> Result<(), String> {
     }
   }
 
-  let mut canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
+  let mut canvas = window
+    .into_canvas()
+    .accelerated()
+    .target_texture()
+    .build()
+    .map_err(|e| e.to_string())?;
 
   let mut x = 0;
   let mut event_pump = sdl_context.event_pump()?;
+  canvas.set_blend_mode(sdl2::render::BlendMode::Blend);
+  canvas.set_draw_color(Color::RGBA(0, 0, 0, 0));
+  canvas.clear();
+
+  canvas.set_draw_color(Color::RGB(0, 0, 200));
+  canvas.fill_rect(Rect::new(x, 0, 100, 100))?;
+  canvas.present();
 
   'running: loop {
     for event in event_pump.poll_iter() {
@@ -70,14 +78,6 @@ pub fn main() -> Result<(), String> {
       }
     }
 
-    canvas.set_draw_color(Color::RGBA(0, 0, 0, 100));
-    canvas.clear();
-
-    canvas.set_draw_color(Color::RGB(0, 0, 200));
-    canvas.fill_rect(Rect::new(x, 0, 100, 100))?;
-    canvas.present();
-
-    x += 1;
     ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 30));
     // The rest of the game loop goes here...
   }
