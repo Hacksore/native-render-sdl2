@@ -15,7 +15,7 @@ fn draw_square(ui: &mut egui::Ui) {
   painter.rect(
     rect,
     0.0,                                  // Rounding radius (0 means no rounding)
-    Color32::from_rgb(200, 100, 100),     // Fill color
+    Color32::from_rgb(0, 0, 100),     // Fill color
     Stroke::new(2.0, Color32::default()), // Stroke (border width and color)
   );
 }
@@ -41,6 +41,7 @@ struct SquareApp;
 impl eframe::App for SquareApp {
   fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
     let frame = egui::Frame {
+      // BUG: this does not work because of https://github.com/emilk/egui/issues/3632
       fill: egui::Color32::TRANSPARENT,
       ..Default::default()
     };
