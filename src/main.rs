@@ -5,6 +5,7 @@ use notan::prelude::*;
 fn main() -> Result<(), String> {
   let win = WindowConfig::default()
     .set_transparent(true)
+    .set_mouse_passthrough(true)
     .set_always_on_top(true)
     .set_decorations(false);
 
