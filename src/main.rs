@@ -11,19 +11,24 @@ fn main() -> Result<(), String> {
     .set_decorations(false);
 
   notan::init_with(setup)
-    .add_config(win)
     .add_config(DrawConfig)
+    .add_config(win)
     .draw(draw)
     .build()
 }
 
 fn setup(app: &mut App, gfx: &mut Graphics) {
-  let win = app.window();
+  println!("app {:?}", app.timer.delta());
 
-  let raw_handle = win.raw_window_handle();
+  let window  = app.window();
+  // let backend = &app.backend;
+
+  println!("{}", window.is_always_on_top());
 }
 
-fn draw(gfx: &mut Graphics) {
+fn draw(app: &mut App, gfx: &mut Graphics) {
+  let window  = app.window();
+  println!("{}", window.is_always_on_top());
   let mut draw = gfx.create_draw();
   draw.clear(Color::TRANSPARENT);
   draw.rect((100.0, 100.0), (600.0, 400.0));
