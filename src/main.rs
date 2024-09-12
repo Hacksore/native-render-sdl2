@@ -1,5 +1,6 @@
 use notan::draw::*;
 use notan::prelude::*;
+use raw_window_handle::RawWindowHandle;
 
 #[notan_main]
 fn main() -> Result<(), String> {
@@ -9,11 +10,17 @@ fn main() -> Result<(), String> {
     .set_always_on_top(true)
     .set_decorations(false);
 
-  notan::init()
+  notan::init_with(setup)
     .add_config(win)
     .add_config(DrawConfig)
     .draw(draw)
     .build()
+}
+
+fn setup(app: &mut App, gfx: &mut Graphics) {
+  let win = app.window();
+
+  let raw_handle = win.raw_window_handle();
 }
 
 fn draw(gfx: &mut Graphics) {
