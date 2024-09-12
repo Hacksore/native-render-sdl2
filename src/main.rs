@@ -1,23 +1,32 @@
-use notan::draw::*;
-use notan::prelude::*;
+use speedy2d::color::Color;
+use speedy2d::dimen::Vector2;
+use speedy2d::shape::Rect;
+use speedy2d::window::{WindowCreationOptions, WindowHandler, WindowHelper};
+use speedy2d::{Graphics2D, Window};
 
-#[notan_main]
-fn main() -> Result<(), String> {
-  let win = WindowConfig::default()
-    .set_transparent(true)
-    .set_always_on_top(true)
-    .set_decorations(false);
-
-  notan::init()
-    .add_config(win)
-    .add_config(DrawConfig)
-    .draw(draw)
-    .build()
+fn main() {
+  let window = Window::new_with_options(
+    "Title",
+    WindowCreationOptions::new_windowed(
+      speedy2d::window::WindowSize::PhysicalPixels(Vector2::new(500, 500)),
+      None,
+    )
+    .with_decorations(false)
+    .with_always_on_top(true)
+    .with_transparent(true),
+  )
+  .unwrap();
+  window.run_loop(MyWindowHandler {});
 }
 
-fn draw(gfx: &mut Graphics) {
-  let mut draw = gfx.create_draw();
-  draw.clear(Color::TRANSPARENT);
-  draw.rect((100.0, 100.0), (600.0, 400.0));
-  gfx.render(&draw);
+struct MyWindowHandler {}
+
+impl WindowHandler for MyWindowHandler {
+  fn on_draw(&mut self, helper: &mut WindowHelper, graphics: &mut Graphics2D) {
+    graphics.clear_screen(Color::from_rgba(0.0, 0.0, 0.0, 0.0));
+    let start = Vector2::new(0.0, 0.0);
+    let end = Vector2::new(100.0, 100.0);
+    graphics.draw_rectangle(Rect::new(start, end), Color::BLUE);
+    helper.request_redraw();
+  }
 }
