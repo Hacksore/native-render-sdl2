@@ -1,3 +1,4 @@
+use notan::backend::WinitBackend;
 use notan::draw::*;
 use notan::prelude::*;
 use raw_window_handle::RawWindowHandle;
@@ -20,15 +21,17 @@ fn main() -> Result<(), String> {
 fn setup(app: &mut App, gfx: &mut Graphics) {
   println!("app {:?}", app.timer.delta());
 
-  let window  = app.window();
-  // let backend = &app.backend;
+  let mut backend = app.backend
+            .downcast_mut::<WinitBackend>()
+            .ok_or_else(|| "Invalid backend type.".to_string());
 
-  println!("{}", window.is_always_on_top());
+  // TODO HOW TO GET WINIT RAW HANDLE
+  let win = backend.unwrap();
+
 }
 
 fn draw(app: &mut App, gfx: &mut Graphics) {
   let window  = app.window();
-  println!("{}", window.is_always_on_top());
   let mut draw = gfx.create_draw();
   draw.clear(Color::TRANSPARENT);
   draw.rect((100.0, 100.0), (600.0, 400.0));
